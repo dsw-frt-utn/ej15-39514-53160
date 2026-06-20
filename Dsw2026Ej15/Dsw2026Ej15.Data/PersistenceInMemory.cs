@@ -39,4 +39,13 @@ public class PersistenceInMemory : Domain.Interfaces.IPersistence
     {
         _doctors.Add(doctor);
     }
+
+    public IEnumerable<Doctor> GetAllDoctors()
+    {
+        return _doctors;
+    }
+    public Doctor? GetDoctorById(Guid id)
+    {
+        return _doctors.SingleOrDefault(d => d.Id == id);
+    }
 }
