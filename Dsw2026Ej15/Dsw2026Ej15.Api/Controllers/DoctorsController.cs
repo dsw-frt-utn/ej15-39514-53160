@@ -1,4 +1,5 @@
 using Dsw2026Ej15.Api.Models;
+using Dsw2026Ej15.Data;
 using Dsw2026Ej15.Domain.Entities;
 using Dsw2026Ej15.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,64 +19,55 @@ public class DoctorsController : AppController
     [HttpPost("doctors")]
     public async Task<IActionResult> CreateDoctor(DoctorModel.Request request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.LicenseNumber))
-        {
-            return BadRequest("Nombre y matricula son requeridos");
-        }
+        if (string.IsNullOrWhiteSpace(request.Name) ||
+            string.IsNullOrWhiteSpace(request.LicenseNumber))
+            throw new ValidationException("Nombre y matrícula son requeridos");
 
-        var speciality = _persistence.GetSpecialityById(request.SpecialityId);
+        var speciality = await _persistence.GetSpecialityById(request.SpecialityId);
         if (speciality is null)
-        {
-            return BadRequest("Especialidad no existe");
-        }
+            throw new ValidationException("La especialidad no existe");
 
         var doctor = new Doctor(request.Name, request.LicenseNumber, true, speciality);
-        _persistence.SaveDoctor(doctor);
+        await _persistence.SaveDoctor(doctor);
 
-        return Created();
+        return Created();  
     }
-
 
     [HttpGet("doctors")]
     public async Task<IActionResult> ReadActiveDoctors()
     {
-        var responseList = _persistence
-            .GetAllDoctors()
-            .Where(d => d.IsActive)
-            .Select(d => DoctorModel.ResponseList.DoctorList(d));
+        var doctors = await _persistence.GetAllDoctors();
+        var responseList = doctors.Where(d => d.IsActive).Select(d => DoctorModel.ResponseList.DoctorList(d));
 
-        return Ok(responseList);
+        return Ok(responseList); 
     }
-
 
     [HttpGet("doctors/{id}")]
     public async Task<IActionResult> ReadDoctorById(Guid id)
     {
-        var doctor = _persistence.GetDoctorById(id);
+        var doctor = await _persistence.GetDoctorById(id);
 
         if (doctor is null || !doctor.IsActive)
-        {
-            throw new ValidationException("No se encuentra el medico o no esta activo");
-            //return NotFound("No se encuentra el medico o no esta activo");
-        }
+            throw new ValidationException("No se encuentra el médico o no está activo");
 
         var responseId = DoctorModel.ResponseId.DoctorId(doctor);
-        return Ok(responseId);
+        return Ok(responseId); 
     }
 
     [HttpDelete("doctors/{id}")]
-
     public async Task<IActionResult> DeactivateDoctor(Guid id)
     {
-        var doctor = _persistence.GetDoctorById(id);
+        var doctor = await _persistence.GetDoctorById(id);
 
         if (doctor is null || !doctor.IsActive)
-        {
-            throw new ValidationException("No se encuentra el medico o no esta activo");
-            // return NotFound("No se encuentra el medico o no esta activo");
-        }
+            throw new ValidationException("No se encuentra el médico o no está activo");
 
         doctor.Deactivate();
+
+        if (_persistence is PersistenceEf ef)
+            await ef.UpdateDoctor(doctor);
+        else
+            await _persistence.SaveDoctor(doctor); 
 
         return NoContent();
     }

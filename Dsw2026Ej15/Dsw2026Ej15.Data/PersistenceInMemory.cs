@@ -1,10 +1,10 @@
-using System.Text.Json;
-using Dsw2026Ej15.Domain.Entities;
 using Dsw2026Ej15.Data.Dtos;
+using Dsw2026Ej15.Domain.Entities;
+using System.Text.Json;
 
 namespace Dsw2026Ej15.Data;
 
-public class PersistenceInMemory : Domain.Interfaces.IPersistence
+public class PersistenceInMemory
 {
     private List<Speciality> _specialities = [];
     private List<Doctor> _doctors = [];
