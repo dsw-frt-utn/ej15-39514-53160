@@ -4,7 +4,7 @@ using Dsw2026Ej15.Data.Dtos;
 
 namespace Dsw2026Ej15.Data;
 
-public class PersistenceInMemory : Domain.Interfaces.IPersistence
+public class PersistenceInMemory
 {
     private List<Speciality> _specialities = [];
     private List<Doctor> _doctors = [];

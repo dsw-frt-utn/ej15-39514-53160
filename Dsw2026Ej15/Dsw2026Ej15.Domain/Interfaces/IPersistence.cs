@@ -4,8 +4,8 @@ namespace Dsw2026Ej15.Domain.Interfaces;
 
 public interface IPersistence
 {
-    IEnumerable<Doctor> GetAllDoctors();
-    Doctor? GetDoctorById(Guid id);
-    Speciality? GetSpecialityById(Guid id);
-    void SaveDoctor(Doctor doctor);
+    Task<IEnumerable<Doctor>> GetAllDoctors();
+    Task<Doctor?> GetDoctorById(Guid id);
+    Task<Speciality?> GetSpecialityById(Guid id);
+    Task SaveDoctor(Doctor doctor);
 }
